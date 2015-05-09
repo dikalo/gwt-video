@@ -20,6 +20,7 @@ import static com.google.gwt.core.client.GWT.getModuleBaseURL;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ait.toolkit.core.client.JsoHelper;
 import com.ait.toolkit.videoplayer.client.resources.VideoPlayerResources;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
@@ -29,7 +30,7 @@ import com.google.gwt.dom.client.VideoElement;
 import com.google.gwt.user.client.ui.Widget;
 
 public class VideoPlayer extends Widget {
-    public static final String VERSION = "4.12.6";
+    public static final String VERSION = "v4126"; // 4.12.6
 
     private static final String FALLBACK_SWF = getModuleBaseURL() + "/videojs/" + VERSION + "/video-js.swf";
     private static final String DEFAULT_PRELOAD = MediaElement.PRELOAD_NONE;
@@ -41,6 +42,8 @@ public class VideoPlayer extends Widget {
     private boolean controls = true;
     private String preload = DEFAULT_PRELOAD;
     private String poster = null;
+    private boolean loop = false;
+    private boolean autoPlay = false;
     private int startPosition = 0;
 
     private List<String> sources = new ArrayList<String>();
@@ -128,6 +131,38 @@ public class VideoPlayer extends Widget {
 
         this.playerObject = null;
     }
+
+    /**
+     * Updates the video source.
+     * Use this method if you are sure the current playback technology (HTML5/Flash) can support the source you provide. 
+     * Currently only MP4 files can be used in both HTML5 and Flash.
+     */
+    public native void setSource( String value ) /*-{
+		var player = this.@com.ait.toolkit.videoplayer.client.VideoPlayer::playerObject;
+
+		if (player) {
+			player.src(value);
+		}
+    }-*/;
+
+    /**
+     * Updates the video source
+     */
+    public void setSource( VideoSource... sources ) {
+        JavaScriptObject array = JsoHelper.createJavaScriptArray();
+        for( int i = 0; i < sources.length; i++ ) {
+            JsoHelper.setArrayValue( array, i, sources[i].getJsObj() );
+        }
+        _setSource( array );
+    }
+
+    private native void _setSource( JavaScriptObject values ) /*-{
+		var player = this.@com.ait.toolkit.videoplayer.client.VideoPlayer::playerObject;
+
+		if (player) {
+			player.src(values);
+		}
+    }-*/;
 
     /**
      * Add a CSS class name to the component's element
@@ -817,6 +852,10 @@ public class VideoPlayer extends Widget {
      */
     public void setPreload( String preload ) {
         this.preload = preload;
+    }
+
+    public void setLoop( boolean loop ) {
+        this.loop = loop;
     }
 
     /**
